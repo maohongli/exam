@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="{{asset('css/app.css')}}">
+</head>
+<body>
+姓名搜索:<input type="text"  id="sear"  >性别搜索: <input type="text" id="sea"> <button class="page">搜索</button>
+<table class="table table-bordered">
+    <tr>
+        <td>id</td>
+        <td>车次</td>
+        <td>姓名</td>
+        <td>身份证</td>
+        <td>性别</td>
+        <td>单位</td>
+        <td>代理人姓名</td>
+        <td>代理单位</td>
+        <td>流程状态</td>
+        <td>预约状态</td>
+        <td>操作</td>
+    </tr>
+    <tbody id="tb">
+    @foreach($res as $k=>$v)
+        <tr>
+            <td>{{$v->id}}</td>
+            <td>{{$v->ban}}</td>
+            <td>{{$v->name}}</td>
+            <td>{{$v->shenfen}}</td>
+            <td>{{$v->sex}}</td>
+            <td>{{$v->danwei}}</td>
+            <td>{{$v->d_name}}</td>
+            <td>{{$v->d_city}}</td>
+            <td>
+                @if($v->status==0)
+                    已确认
+                @elseif($v->status==1)
+                    已获取
+
+                @endif
+            </td>
+            <td>
+                @if($v->yu_status==0)
+                    预约成功
+                @elseif($v->yu_status==1)
+                    预约未成功
+
+                @endif
+
+            </td>
+            <td><a href="#"  id="{{$v->id}}"  class="page">删除</a><a href="xiang?id={{$v->id}}">详情</a></td>
+        </tr>
+
+
+    @endforeach
+    </tbody>
+</table>
+<input type="hidden" value="1" id="shou">
+<input type="hidden" value="{{$end}}" id="wei">
+<a href="#" class="page">首页</a>
+<a href="#" class="page">上一页</a>
+<a href="#" class="page">下一页</a>
+<a href="#" class="page">尾页</a>
+</body>
+</html>
+<script src="/js/jquery-3.3.1.min.js"></script>
+<script>
+     $(document).on("click",".page",function () {
+          shou=$("#shou").val();
+          wei=$("#wei").val();
+          text=$(this).text();
+          sear=$("#sear").val();
+         sea=$("#sea").val();
+         id=$(this).attr("id");
+
+
+          if(text=="首页"){
+              page=1
+          }else if(text=="上一页"){
+              page=parseInt(shou)-1<1?1:parseInt(shou)-1
+          }else if(text=="下一页"){
+              page=parseInt(shou)+1>wei?wei:parseInt(shou)+1
+          }else if(text=="尾页"){
+              page=wei
+          }else{
+              page=1
+          }
+       $.ajax({
+           url:"fen",
+           type:"post",
+           dataType:"json",
+           data:{
+               page:page,
+               sear:sear,
+               sea:sea,
+               id:id
+           },
+           success:function (data) { console.log(data)
+             str="";
+
+             $.each(data.res,function (k,v) {
+                 arr="";
+                 st="";
+                 if (v.status==0){
+                   st+="已确认"
+                 }else{
+                     st+="已获取"
+                 }
+                 if (v.yu_status==0){
+                     arr+="预约成功"
+                 }else{
+                     arr+="预约未成功"
+                 }
+
+
+
+                 str+= '<tr>'
+                 str+='<td>'+v.id+'</td>'
+                 str+='<td>'+v.ban+'</td>'
+                 str+='<td>'+v.name+'</td>'
+                 str+=' <td>'+v.shenfen+'</td>'
+                 str+= '<td>'+v.sex+'</td>'
+                 str+=' <td>'+v.danwei+'</td>'
+                 str+= '<td>'+v.d_name+'</td>'
+                 str+='<td>'+v.d_city+'</td>'
+                 str+=' <td>'+st+' </td>'
+                 str+= '<td>'+arr+' </td>'
+                 str+=' <td><a href="#"   id="'+v.id+'"  class="page">删除</a><a href="xiang?id='+v.id +'">详情</a></td>'
+                 str+='  </tr> '
+             })
+               $("#tb").html(str);
+               $("#shou").val(page);
+               $("#wei").val(data.end);
+           }
+       })
+     })
+</script>
